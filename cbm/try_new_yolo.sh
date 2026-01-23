@@ -1,0 +1,2 @@
+CUDA_VISIBLE_DEVICES=2 python pope_test_data_trainsform.py
+CUDA_VISIBLE_DEVICES=2 python feature_extract.py
