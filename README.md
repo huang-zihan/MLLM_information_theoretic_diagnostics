@@ -1,5 +1,7 @@
 # Concept Bottleneck Models for Multimodal Understanding
 
+[Paper Link](https://openreview.net/pdf?id=pQm66IPmeE)
+
 ## Overview
 
 This repository implements a comprehensive **Concept Bottleneck Model (CBM)** pipeline for multimodal understanding tasks, particularly focusing on visual question answering (VQA). The framework extracts interpretable visual concepts from images and uses them as bottlenecks for downstream reasoning tasks. The system supports both training on large-scale datasets (COCO2014) and evaluation on multiple benchmarks including Pope, CHAIR, HAL, and VQA-v2.
