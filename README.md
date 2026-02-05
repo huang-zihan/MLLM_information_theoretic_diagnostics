@@ -2,9 +2,28 @@
 
 [Paper Link](https://openreview.net/pdf?id=pQm66IPmeE)
 
-## Overview
+<!-- ## Overview
 
-This repository implements a comprehensive **Concept Bottleneck Model (CBM)** pipeline for multimodal understanding tasks, particularly focusing on visual question answering (VQA). The framework extracts interpretable visual concepts from images and uses them as bottlenecks for downstream reasoning tasks. The system supports both training on large-scale datasets (COCO2014) and evaluation on multiple benchmarks including Pope, CHAIR, HAL, and VQA-v2.
+Existing multimodal large language models (MLLMs) often lack traceable and explainable mechanisms for visual-textual alignment, making
+it challenging to understand how textual instructions shape multimodal
+representations. To address this shortcoming, we propose an informationtheoretic framework that clarifies how MLLMs handle and transform both
+text and visual inputs. In particular, we measure the visual information gain
+that arises from textual instructions and multimodal encodings, thereby
+illuminating how different modalities interact and contribute to the model’s
+overall processing. Our framework decomposes the multimodal encoding
+process into layer-wise mutual information measures for better explainability, quantifying the visual contribution as the difference between unconditional and text-conditional mutual information. Specifically, inspired
+by the Information Bottleneck framework, we introduce a Concept Bottleneck that maps high-dimensional multimodal representations into an
+interpretable space, enabling tractable variational upper bounds on the
+mutual information between visual inputs and the model’s internal states.
+Furthermore, we quantify the contextual contribution introduced by textual
+cues via an InfoNCE mechanism that contrasts multimodal representations
+computed with and without text guidance. This dual perspective, facilitated by tractable variational upper bounds, provides insight into how
+visual information is encoded and filtered by textual instructions, while also
+highlighting the contextual information induced and enhanced by MLLMs.
+Empirical findings demonstrate underexplored dynamics of visual-textual
+interaction within MLLMs, underscoring how textual instructions distinctly
+shape visual representations and demonstrating how visual prompts, when
+effectively paired with instructions, enhance multimodal understanding. -->
 
 <!-- ## Mathematical Framework
 
