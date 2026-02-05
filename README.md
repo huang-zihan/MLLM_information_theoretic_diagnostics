@@ -99,11 +99,11 @@ python ms_coco_training_data_trainsform.py
 #### Output Files:
 - `ce_data.pth`: Dataset containing image features and softmaxed concept ground truth
 
-### Step 3 LLaVA Feature Extraction:
-Extract multimodal features using LLaVA:
+### Step 3 LLaVA/Qwen Feature Extraction:
+Extract multimodal features using LLaVA/Qwen:
 ```bash
 cd ../LLaVA
-./ce_datagen.sh
+./ce_datagen.sh # which include the branch for Qwen
 ```
 
 #### Output Files:
@@ -111,14 +111,14 @@ cd ../LLaVA
 
 - `ce_training_label.pth`: Ground truth concept labels
 
-- `ce_training_response.pth`: LLaVA model outputs
+- `ce_training_response.pth`: LLaVA/Qwen model outputs
 
-### Step 4 LLaVA Feature Extraction:
+### Step 4 LLaVA/Qwen Feature Extraction:
 
 Train the Concept Bottleneck Model:
 ```bash
 cd ../cbm
-./ce_train.sh
+./ce_train.sh # which include the branch for Qwen
 ```
 
 #### Output File:

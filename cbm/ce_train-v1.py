@@ -76,7 +76,7 @@ class CE(nn.Module):
         else:
             self.fc1 = nn.Linear(4096, 512)  # 假设每个 tensor 是 1024 维
         self.fc2 = nn.Linear(512, 128)
-        self.fc3 = nn.Linear(128, len(labels[0]))  # 10个分类
+        self.fc3 = nn.Linear(128, len(labels[0])) 
         print(len(labels[0]))
 
     def forward(self, x):
