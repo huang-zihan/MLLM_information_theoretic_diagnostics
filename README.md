@@ -67,7 +67,7 @@ cbm/
     └── plot_offline.py               # Result visualization
 
 LLaVA/
-├── ce_datagen.sh                     # LLaVA feature generation for training
+├── ce_datagen.sh                     # LLaVA/Qwen feature generation for training
 ├── run-pope-cbm.sh                   # Pope evaluation with LLaVA
 ├── run-chair-cbm.sh                  # CHAIR evaluation with LLaVA
 └── vqa_datagen-v1.py                 # VQA feature generation
@@ -137,11 +137,11 @@ python pope_test_data_trainsform.py
 #### Output File: 
 - `pope_ce_test_data.pth`
 
-### Step 2: LLaVA Feature Extraction for Pope
+### Step 2: LLaVA/Qwen Feature Extraction for Pope
 
 ```bash
 cd ../LLaVA
-./run-pope-cbm.sh
+./run-pope-cbm.sh # which include the branch for Qwen
 ```
 
 #### Output Files:
