@@ -5,30 +5,30 @@ from datasets import load_dataset
 from ultralytics import YOLO
 import cv2
 
-# 加载数据
-object_dict = None#torch.load('object_dict.pth')  # 物体名称与编号的映射
+# Load data
+object_dict = None
 visual_prompt=False
 
 
-# 初始化数据集
+# Initialize dataset
 dataset = []
 
 def softmax(lst):
-    # 计算所有元素的指数之和
+    # Compute the sum of exponentials of all elements
     sum_exp = sum(lst)
     
-    # 计算Softmax值
+    # Compute Softmax values
     softmax_lst = [x / sum_exp for x in lst]
     
     return softmax_lst
 
 train_dataset = load_dataset("HuggingFaceM4/A-OKVQA", split="validation", cache_dir='/deepfreeze/junda/datasets/')
-model_name = 'yolo11l.pt'  # 使用高版本模型
-device = 'cuda' if torch.cuda.is_available() else 'cpu'  # 确保使用GPU
-model = YOLO(model_name).to(device)  # 加载高版本模型
+model_name = 'yolo11l.pt'  # Use higher version model
+device = 'cuda' if torch.cuda.is_available() else 'cpu'  # Ensure using GPU
+model = YOLO(model_name).to(device)  # Load higher version model
 
 if not visual_prompt:
-    # 创建输出文件夹
+    # Create output directory
     output_dir = 'result/aokvqa_feature/img/'
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
@@ -44,31 +44,30 @@ for i, item in enumerate(train_dataset):
     print(i, "/", len(train_dataset), end='\r')
     
     if not visual_prompt:
-        # 将图像保存到文件
+        # Save image to file
         image = item['image'].convert('RGB')
         image_path = os.path.join(output_dir, f'image_{i}.jpg')
-        cv2.imwrite(image_path, np.array(image)[:, :, ::-1])  # 保存为BGR格式
+        cv2.imwrite(image_path, np.array(image)[:, :, ::-1])  # Save in BGR format
     else:
         image_path = os.path.join(output_dir, f'annotated_image_{i}.jpg')
         
-    # 进行推理
+    # Perform inference
     with torch.no_grad():
-        results = model.predict(image_path, device=device, verbose=False)  # 使用新的推理方式
+        results = model.predict(image_path, device=device, verbose=False)  # Use new inference method
         if object_dict is None:
             # print(results[0])
             object_dict=results[0].names
-            # 获取物体的数量
+            # Get number of objects
             num_classes = len(object_dict)
-            # print(object_dict, num_classes)
-            # exit()
 
-    # 处理结果
-    detections = results[0]  # 获取检测结果
+
+    # Process results
+    detections = results[0]  # Get detection results
     annotation = [0] * len(object_dict)
     
-    for box in detections.boxes:  # 遍历每个检测框
-        cls = int(box.cls.item())  # 获取类别
-        conf = float(box.conf.item())  # 获取置信度
+    for box in detections.boxes:  # Iterate over each detection box
+        cls = int(box.cls.item())  # Get class
+        conf = float(box.conf.item())  # Get confidence
         annotation[cls] += conf
 
     # print(annotation)
@@ -77,19 +76,16 @@ for i, item in enumerate(train_dataset):
     else:
         annotation = []
     
-    # 构建数据项
+    # Build data item
     data_item = {
         'id': i,
         'annotation': annotation
     }
     
-    # 添加到数据集中
+    # Add to dataset
     dataset.append(data_item)
-    # if i==10:
-    #     break
 
-# print(dataset)
-# 保存结果
+# Save results
 if not visual_prompt:
     torch.save(dataset, f"result/aokvqa_feature/aokvqa_ce_test_data_{model_name}.pth")
 else:
@@ -97,68 +93,3 @@ else:
 print("aokvqa yolo done!")
 print()
 print()
-
-# # 清理临时文件
-# import shutil
-# shutil.rmtree(output_dir)  # 删除临时文件夹
-
-# import torch
-# import numpy as np
-# import math
-# from datasets import load_dataset
-
-
-# # 加载数据
-# object_dict = torch.load('object_dict.pth')  # 物体名称与编号的映射
-
-# # 获取物体的数量
-# num_classes = len(object_dict)
-
-# # 初始化数据集
-# dataset = []
-
-# def softmax(lst):
-#     # # 减去最大值，避免数值溢出
-#     # max_val = max(lst)
-#     # exp_lst = [math.exp(x - max_val) for x in lst]
-    
-#     # 计算所有元素的指数之和
-#     sum_exp = sum(lst)
-    
-#     # 计算Softmax值
-#     softmax_lst = [x / sum_exp for x in lst]
-    
-#     return softmax_lst
-
-
-# train_dataset = load_dataset("lmms-lab/POPE", split="test") #"default"
-# model = torch.hub.load('ultralytics/yolov5', 'yolov5s')  # 可以选择其他模型如 'yolov5m', 'yolov5l', 'yolov5x'
-
-
-# # 遍历原始结果
-# for i, item in enumerate(train_dataset):
-#     print(i, "/", len(train_dataset), end='\r')
-
-#     # print(train_dataset)
-#     image = item['image'].convert('RGB')
-#     results = model(image)
-#     detections = results.pandas().xyxy[0]
-    
-#     annotation=[0]*len(object_dict)
-#     for index, row in detections.iterrows():
-#         if row['name'] not in object_dict:
-#             continue
-#         annotation[object_dict[row['name']]]+=row['confidence']
-        
-#     annotation=softmax(annotation)
-
-#     # 构建数据项
-#     data_item = {
-#         'id': item['id'],
-#         'annotation': annotation
-#     }
-    
-#     # 添加到数据集中
-#     dataset.append(data_item)
-
-# torch.save(dataset, "pope_ce_test_data.pth")

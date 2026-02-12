@@ -7,7 +7,6 @@ import random
 import matplotlib.pyplot as plt
 import pandas as pd
 
-# 1. 定义模型类
 class SimilarityNetwork(nn.Module):
     def __init__(self):
         super(SimilarityNetwork, self).__init__()
@@ -28,18 +27,15 @@ class SimilarityNetwork(nn.Module):
         logits_feature1 = feature1 @ feature2.t()/feature1[0].shape[-1]
         logits_feature2 = logits_feature1.t()
 
-        # # 计算相似度得分
         return logits_feature1, logits_feature2
 
 
 def info_nce_loss(model, data_l, data_L):
     N = data_l.size(0)
-    # 计算相似性分数
-    # 计算温度参数 tau
+
     tau = len(data_l[0])**0.5
     
     all_NCE=[]
-    # 计算正样本相似性, row of similarity1
     similarity_scores1, similarity_scores2 = model(data_l, data_L)
     for i in range(len(data_l)):
         
@@ -47,21 +43,19 @@ def info_nce_loss(model, data_l, data_L):
         neg_sim = sum([torch.exp(similarity_scores1[i][j]/tau) for j in range(len(data_l))])
         all_NCE.append(torch.log(pos_sim/neg_sim))
 
-    # 计算损失
-    loss = -sum(all_NCE)/len(all_NCE)  # InfoNCE损失
+    loss = -sum(all_NCE)/len(all_NCE)
     return loss
 
 index=1
 epoch=399
 
-# 2. 加载模型
 model = SimilarityNetwork().to("cuda:0")
 model.load_state_dict(torch.load(f'./similarity_network_full_v1_combine_epoch{epoch}.pth'))
-model.eval()  # 设置为评估模式
+model.eval()
 
 base_model = SimilarityNetwork().to("cuda:0")
 base_model.load_state_dict(torch.load(f'./similarity_network_only_image_full_v1_combine_epoch{epoch}.pth'))
-base_model.eval()  # 设置为评估模式
+base_model.eval()
 
 input_data_name_list={
     "": '../pope/pope_info_probe_list_v1.pth',
@@ -83,7 +77,6 @@ missing_digit_lists=[
     [2, 244, 360, 408, 502, 508, 788, 984, 1000, 1032, 1176, 1188, 1218, 1594, 1616, 1628, 1658, 1758, 1892, 1898, 2096, 2174, 2364, 2576, 2700, 2778, 3002, 3244, 3360, 3408, 3502, 3508, 3788, 3984, 4000, 4032, 4176, 4188, 4218, 4594, 4616, 4628, 4658, 4758, 4892, 4898, 5096, 5174, 5364, 5576, 5700, 5778, 6002, 6244, 6360, 6408, 6502, 6508, 6788, 6984, 7000, 7032, 7176, 7188, 7218, 7594, 7616, 7628, 7658, 7758, 7892, 7898, 8096, 8174, 8364, 8576, 8700, 8778]
 ]
 
-
 for idx, (input_data_name, base_input_data_name) in enumerate(zip(input_data_name_list.values(), base_input_data_name_list.values())):
 
     input_datas = torch.load(input_data_name)
@@ -98,7 +91,6 @@ for idx, (input_data_name, base_input_data_name) in enumerate(zip(input_data_nam
     base_input_L=torch.stack(base_input_datas[-1]).to(torch.float).to("cuda:0")
 
     index_list=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31] # 
-    # result=[]
     base_scores=[]
     scores=[]
     for index in index_list:
@@ -106,15 +98,12 @@ for idx, (input_data_name, base_input_data_name) in enumerate(zip(input_data_nam
         input_l=torch.stack(input_datas[index]).to(torch.float).to("cuda:0")
         base_input_l=torch.stack(base_input_datas[index]).to(torch.float).to("cuda:0")
 
-
-        # 3. 创建数据集和数据加载器
         dataset = TensorDataset(input_l, input_L)
         dataloader = DataLoader(dataset, batch_size=32, shuffle=False)
 
         base_dataset = TensorDataset(base_input_l, base_input_L)
         base_dataloader = DataLoader(base_dataset, batch_size=32, shuffle=False)
 
-        # 4. 推理函数
         def inference(model, dataloader):
             all_scores = []
 
@@ -130,7 +119,6 @@ for idx, (input_data_name, base_input_data_name) in enumerate(zip(input_data_nam
 
             # return torch.cat(predictions), torch.cat(similarity_scores)
 
-        # 5. 执行推理
         score = inference(model, dataloader)
         base_score = inference(base_model, base_dataloader)
         print("taskinfo and base score", score, base_score)

@@ -6,67 +6,67 @@ from ultralytics import YOLO
 import cv2
 import random
 
-# 加载数据
-object_dict = None#torch.load('object_dict.pth')  # 物体名称与编号的映射
+# Load data
+object_dict = None
 visual_prompt=False
 
 
-# 初始化数据集
+# Initialize dataset
 dataset = []
 
 def softmax(lst):
-    # 计算所有元素的指数之和
+    # Compute the sum of exponentials of all elements
     sum_exp = sum(lst)
     
-    # 计算Softmax值
+    # Compute Softmax values
     softmax_lst = [x / sum_exp for x in lst]
     
     return softmax_lst
 
 train_dataset = load_dataset("moranyanuka/OpenCHAIR")['test']
 
-model_name = 'yolo11l.pt'  # 使用高版本模型
-device = 'cuda' if torch.cuda.is_available() else 'cpu'  # 确保使用GPU
-model = YOLO(model_name).to(device)  # 加载高版本模型
+model_name = 'yolo11l.pt'  # Use higher version model
+device = 'cuda' if torch.cuda.is_available() else 'cpu'  # Ensure using GPU
+model = YOLO(model_name).to(device)  # Load higher version model
 
 if not visual_prompt:
-    # 创建输出文件夹
+    # Create output directory
     output_dir = 'result/chair_feature/img/'
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 else:
     output_dir = '/home/shared/rohan/vd-llm/yolo_output/'
 
-# 遍历原始结果
+# Iterate over original results
 missing_obj_index=[]
 description_list=[item['text'] for item in train_dataset]
 for i, item in enumerate(train_dataset):
     print(i, "/", len(train_dataset), end='\r')
 
     if not visual_prompt:
-        # 将图像保存到文件
+        # Save image to file
         image = item['image'].convert('RGB')
         image_path = os.path.join(output_dir, f'image_{i}.jpg')
-        cv2.imwrite(image_path, np.array(image)[:, :, ::-1])  # 保存为BGR格式
+        cv2.imwrite(image_path, np.array(image)[:, :, ::-1])  # Save in BGR format
     else:
         image_path = os.path.join(output_dir, f'annotated_image_{i}.jpg')
         
-    # 进行推理
+    # Perform inference
     with torch.no_grad():
-        results = model.predict(image_path, device=device, verbose=False)  # 使用新的推理方式
+        results = model.predict(image_path, device=device, verbose=False)  # Use new inference method
         if object_dict is None:
             object_dict=results[0].names
-            # 获取物体的数量
+            # Get number of objects
             num_classes = len(object_dict)
 
 
-    # 处理结果
-    detections = results[0]  # 获取检测结果
+    # Process results
+    detections = results[0]  # Get detection results
     annotation = [0] * len(object_dict)
     
-    for box in detections.boxes:  # 遍历每个检测框
-        cls = int(box.cls.item())  # 获取类别
-        conf = float(box.conf.item())  # 获取置信度
+    for box in detections.boxes:  # Iterate over each detection box
+        cls = int(box.cls.item())  # Get class
+        conf = float(box.conf.item())  # Get confidence
         annotation[cls] += conf
     
     if all(x == 0 for x in annotation):
@@ -77,7 +77,7 @@ for i, item in enumerate(train_dataset):
 
     assert item['text']==description_list[i]
     question="Is there "+item['text'].lower()
-    # 构建数据项
+    # Build data item
     data_item = {
         'id': i,
         'image': item['image'],
@@ -86,14 +86,14 @@ for i, item in enumerate(train_dataset):
         'true_caption': True
     }
     
-    # 添加到数据集中
+    # Add to dataset
     dataset.append(data_item)
     
     random_index = random.randint(0, len(description_list) - 1)
     while random_index == i:
         random_index = random.randint(0, len(description_list) - 1)
     question = "Is there "+description_list[random_index].lower()
-    # 添加一个负的问题样例进去
+    # Add a negative question sample
     data_item = {
         'id': i,
         'image': item['image'],
@@ -104,7 +104,7 @@ for i, item in enumerate(train_dataset):
     dataset.append(data_item)
 
 
-# 保存结果
+# Save results
 if not visual_prompt:
     torch.save(dataset, f"result/chair_feature/chair_ce_test_data_{model_name}.pth")
 else:

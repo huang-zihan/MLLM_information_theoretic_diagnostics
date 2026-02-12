@@ -1,15 +1,18 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
+from matplotlib.ticker import FormatStrFormatter
+
 
 # 设置字体为 Times New Roman
 from matplotlib.font_manager import FontProperties
 plt.rcParams['font.family'] = 'serif'
 legend_font_comb = FontProperties(fname='/home/junda/zihan/font/TimesNewRoman.ttf', size=24)
-legend_font_sep = FontProperties(fname='/home/junda/zihan/font/TimesNewRoman.ttf', size=22)
-xylabel_comb = FontProperties(fname='/home/junda/zihan/font/TimesNewRoman.ttf', size=26)
-xylabel_font = FontProperties(fname='/home/junda/zihan/font/TimesNewRoman.ttf', size=24)
-title_font = FontProperties(fname='/home/junda/zihan/font/TimesNewRoman.ttf', size=24)
+# legend_font_sep = FontProperties(fname='/home/junda/zihan/font/TimesNewRoman.ttf', size=30)
+legend_font_sep = FontProperties(fname='/home/junda/zihan/font/TimesNewRoman.ttf', size=24)
+xylabel_comb = FontProperties(fname='/home/junda/zihan/font/TimesNewRoman.ttf', size=32)
+xylabel_font = FontProperties(fname='/home/junda/zihan/font/TimesNewRoman.ttf', size=28)
+title_font = FontProperties(fname='/home/junda/zihan/font/TimesNewRoman.ttf', size=32)
 
 def custom_moving_average(data, window_size=2):
     n = len(data)
@@ -80,13 +83,16 @@ for i, dataset in enumerate(data_results.keys()):
     data_results[dataset]['base_scores']=custom_moving_average(data_results[dataset]['base_scores'], window_size=2)
 
 # 创建 2x2 子图
-fig, axs = plt.subplots(2, 2, figsize=(12, 10))
+# fig, axs = plt.subplots(2, 2, figsize=(12, 10))
+fig, axs = plt.subplots(2, 2, figsize=(12, 8))
 
 # 绘制每种数据的 base_scores 和 scores
 for i, dataset in enumerate(datasets):
     ax = axs[i // 2, i % 2]
     ax.tick_params(axis='both', labelsize=18)
-    
+    # 设置 x 和 y 轴刻度格式为小数点后一位
+    # ax.xaxis.set_major_formatter(FormatStrFormatter('%.1f'))
+    ax.yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
     
     if dataset in ['HAL', 'AOKVQA']:
         if QUESTION_ONLY:
@@ -95,14 +101,14 @@ for i, dataset in enumerate(datasets):
             ax.plot(x_values, data_results["wrong_"+dataset]['base_scores'], marker='x', color='g', label='Image Scores')
         else:
             x_values = np.arange(1, len(data_results["correct_"+dataset]['scores']) + 1)  # 从1开始的 X 值
-            ax.plot(x_values, data_results["correct_"+dataset]['scores'], marker='o', color='b', label='Correct Answer Text, Task Scores')
-            ax.plot(x_values, data_results["correct_"+dataset]['base_scores'], marker='x', color='g', label='Correct Answer Text, Image Scores')
-            ax.plot(x_values, data_results["wrong_"+dataset]['scores'], marker='o', color='r', label='Wrong Answer Text, Task Scores')
-            ax.plot(x_values, data_results["wrong_"+dataset]['base_scores'], marker='x', color='orange', label='Wrong Answer Text, Image Scores')
+            ax.plot(x_values, data_results["correct_"+dataset]['scores'], marker='o', color='b', label=r'Correct Answer Text, $I(X_{T}; X^{(last)}_{T})$')
+            ax.plot(x_values, data_results["correct_"+dataset]['base_scores'], marker='x', color='g', label='Correct Answer Text, $I(X_{0}; X^{(last)}_{0})$')
+            ax.plot(x_values, data_results["wrong_"+dataset]['scores'], marker='o', color='r', label='Wrong Answer Text, $I(X_{T}; X^{(last)}_{T})$')
+            ax.plot(x_values, data_results["wrong_"+dataset]['base_scores'], marker='x', color='orange', label='Wrong Answer Text, $I(X_{0}; X^{(last)}_{0})$')
 
         ax.set_title(datasets_title[dataset], fontproperties=title_font)
         ax.set_xlabel('Layer Index', fontproperties=xylabel_font)
-        ax.set_ylabel(r'$\mathcal{F}^{(l)}_T$', fontproperties=xylabel_font)
+        ax.set_ylabel(r'$\mathcal{F}_T$', fontproperties=xylabel_font)
         ax.grid()
     
     else:
@@ -111,25 +117,31 @@ for i, dataset in enumerate(datasets):
         ax.plot(x_values, data_results[dataset]['base_scores'], marker='x', color='g', label=r'$I(X^{(l)}_{0}; X^{(L)}_{0})$')
         ax.set_title(datasets_title[dataset], fontproperties=title_font)
         ax.set_xlabel('Layer Index', fontproperties=xylabel_font)
-        ax.set_ylabel(r'$\mathcal{F}^{(l)}_T$', fontproperties=xylabel_font)
+        ax.set_ylabel(r'$\mathcal{F}_T$', fontproperties=xylabel_font)
         ax.grid()
 
 # 添加共享 legend
 handles, labels = axs[1, 1].get_legend_handles_labels()
-fig.legend(handles, labels, loc='upper center', prop=legend_font_sep, ncol=2)
+fig.legend(handles, labels, loc='upper center', prop=legend_font_sep, ncol=2, handletextpad=0.2, columnspacing=0.3)
 
 # 调整布局
-plt.tight_layout(rect=[0, 0.03, 1, 0.9])
+plt.tight_layout(rect=[0, 0, 1, 0.82])  # 保持标题的空间
 plt.savefig(f'{prefix}scores_base_scores_comparison.pdf', format='pdf')
 plt.show()
 
 # 画出所有数据集的 score - base_score
-if QUESTION_ONLY or FIXED_QUESTION:
-    plt.figure(figsize=(10, 6))
-else:    
-    plt.figure(figsize=(8, 8))
+# if QUESTION_ONLY or FIXED_QUESTION:
+#     plt.figure(figsize=(10, 6))
+# else:    
+#     plt.figure(figsize=(8, 8))
+plt.figure(figsize=(10, 6))  # 调整为更扁平的尺寸
+# 设置 x 和 y 轴刻度格式为小数点后一位
+# plt.gca().xaxis.set_major_formatter(FormatStrFormatter('%.1f'))
+plt.gca().yaxis.set_major_formatter(FormatStrFormatter('%.1f'))
+markers = ['o', 's', '^', 'x']
 
-for dataset in datasets:
+
+for i, dataset in enumerate(datasets):
     if dataset in ['HAL', 'AOKVQA']:
         if QUESTION_ONLY:
             ma_difference = [a-b for a, b in zip(data_results["wrong_"+dataset]['scores'], data_results["wrong_"+dataset]['base_scores'])]
@@ -143,11 +155,11 @@ for dataset in datasets:
         shift_value = ma_difference[0]
         ma_difference = ma_difference - shift_value
     x_values = np.arange(1, len(ma_difference) + 1)  # 从1开始的 X 值
-    plt.plot(x_values, ma_difference, linestyle='--', label=f'{datasets_title[dataset]}', linewidth=2)
+    plt.plot(x_values, ma_difference, linestyle='-', marker=markers[i], label=f'{datasets_title[dataset]}', linewidth=2)
 
 plt.tick_params(axis='both', labelsize=24)
 plt.xlabel('Layer Index', fontproperties=xylabel_comb)
-plt.ylabel(r'$\mathcal{F}^{(l)}_T$', fontproperties=xylabel_comb)
+plt.ylabel(r'$\mathcal{F}_T$', fontproperties=xylabel_comb)
 plt.grid()
 plt.axhline(0, color='black', linestyle='--', label='Zero Line')
 plt.legend(prop=legend_font_comb)

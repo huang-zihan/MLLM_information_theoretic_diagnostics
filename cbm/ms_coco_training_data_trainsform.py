@@ -2,68 +2,56 @@ import torch
 import numpy as np
 import math
 
-# dataset = torch.load("ce_data_full.pth")
-# print(len(dataset))
-# dataset = torch.load("ce_data_full_v1.pth")
-# print(len(dataset))
-# exit()
+model_name = 'yolo11l.pt'
 
-# object_dict1 = torch.load('object_dict.pth')  # 物体名称与编号的映射
-# object_dict2 = torch.load('object_dict_full.pth')  # 物体名称与编号的映射
-# print(len(object_dict1), len(object_dict2))
-# print(object_dict1)
-# exit()
+# Load data
+object_dict = torch.load(f'result/coco_feature/object_dict_full_{model_name}.pth')  # Mapping of object names to indices
+raw_result = torch.load(f'result/coco_feature/raw_result_full_{model_name}.pth')  # Mapping of images to object scores
 
+# Get number of objects
+num_classes = 80 #len(object_dict)
 
-# 加载数据
-object_dict = torch.load('object_dict_full.pth')  # 物体名称与编号的映射
-raw_result = torch.load('raw_result_full.pth')  # 图片与物体得分的映射
-
-# 获取物体的数量
-num_classes = len(object_dict)
-
-# 初始化数据集
+# Initialize dataset
 dataset = []
 
 def softmax(lst):
-    # # 减去最大值，避免数值溢出
-    # max_val = max(lst)
-    # exp_lst = [math.exp(x - max_val) for x in lst]
-    
-    # 计算所有元素的指数之和
+    # Compute the sum of exponentials of all elements
     sum_exp = sum(lst)
     
-    # 计算Softmax值
+    # Compute Softmax values
     softmax_lst = [x / sum_exp for x in lst]
     
     return softmax_lst
 
-
-# 遍历原始结果
+# Iterate over original results
 for i, (image_name, scores) in enumerate(raw_result.items()):
     
     print(i, "/", len(raw_result), end='\r')
     
     if len(scores)==0:
+        # continue
+        data_item = {
+            'image': image_name,
+            'annotation': None
+        }
+        dataset.append(data_item)
         continue
     
-    # 创建注释列表，初始化为0
+    # Create annotation list, initialize with zeros
     annotation = [0] * num_classes
     
-
-    
-    # 填充注释列表
+    # Fill annotation list
     for obj_index, score in scores.items():
         annotation[obj_index] = sum(score)
-    annotation=softmax(annotation)
+    annotation = softmax(annotation)
     
-    # 构建数据项
+    # Build data item
     data_item = {
         'image': image_name,
         'annotation': annotation
     }
     
-    # 添加到数据集中
+    # Add to dataset
     dataset.append(data_item)
 
-torch.save(dataset, "ce_data_full.pth")
+torch.save(dataset, f"ce_data_full_v1.pth")

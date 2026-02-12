@@ -10,7 +10,6 @@ import torch
 # test_data="vqa"
 # test_data="coco_caption"
 
-
 # test_data="hal"
 test_data="aokvqa"
 # test_data="vqa_origin"
@@ -41,9 +40,7 @@ if test_data=="hal" or test_data=="chair" or test_data=="coco_caption" or test_d
             missing_index = [128, 129, 130, 131, 136, 137, 138, 139, 520, 521, 522, 523, 1064, 1065, 1066, 1067, 1896, 1897, 1898, 1899, 2068, 2069, 2070, 2071, 2340, 2341, 2342, 2343, 2620, 2621, 2622, 2623, 2812, 2813, 2814, 2815, 3384, 3385, 3386, 3387, 3972, 3973, 3974, 3975, 4292, 4293, 4294, 4295, 4496, 4497, 4498, 4499, 5384, 5385, 5386, 5387, 5552, 5553, 5554, 5555, 6044, 6045, 6046, 6047, 6188, 6189, 6190, 6191, 6356, 6357, 6358, 6359, 6488, 6489, 6490, 6491, 6964, 6965, 6966, 6967, 7496, 7497, 7498, 7499, 7540, 7541, 7542, 7543, 7656, 7657, 7658, 7659, 7956, 7957, 7958, 7959, 8076, 8077, 8078, 8079, 8084, 8085, 8086, 8087, 8096, 8097, 8098, 8099, 8604, 8605, 8606, 8607, 8700, 8701, 8702, 8703, 9040, 9041, 9042, 9043, 9060, 9061, 9062, 9063, 9612, 9613, 9614, 9615, 9628, 9629, 9630, 9631, 10112, 10113, 10114, 10115, 10292, 10293, 10294, 10295, 10488, 10489, 10490, 10491, 11192, 11193, 11194, 11195, 11212, 11213, 11214, 11215, 11800, 11801, 11802, 11803, 12036, 12037, 12038, 12039, 12760, 12761, 12762, 12763, 13324, 13325, 13326, 13327, 13720, 13721, 13722, 13723, 13856, 13857, 13858, 13859, 14152, 14153, 14154, 14155, 14260, 14261, 14262, 14263, 14280, 14281, 14282, 14283, 14348, 14349, 14350, 14351, 14356, 14357, 14358, 14359, 14364, 14365, 14366, 14367, 14408, 14409, 14410, 14411, 14420, 14421, 14422, 14423, 14908, 14909, 14910, 14911, 14916, 14917, 14918, 14919, 14928, 14929, 14930, 14931, 15204, 15205, 15206, 15207, 15344, 15345, 15346, 15347, 15360, 15361, 15362, 15363, 15372, 15373, 15374, 15375, 15784, 15785, 15786, 15787, 15860, 15861, 15862, 15863, 16300, 16301, 16302, 16303, 16468, 16469, 16470, 16471, 16972, 16973, 16974, 16975, 17400, 17401, 17402, 17403, 17412, 17413, 17414, 17415, 17424, 17425, 17426, 17427, 17696, 17697, 17698, 17699, 17816, 17817, 17818, 17819, 17820, 17821, 17822, 17823, 17936, 17937, 17938, 17939, 18412, 18413, 18414, 18415, 18448, 18449, 18450, 18451, 18840, 18841, 18842, 18843, 18924, 18925, 18926, 18927, 19408, 19409, 19410, 19411, 19416, 19417, 19418, 19419]
             input_datas = torch.load(f'hal/{prefix}wrong_hal_ce_val_question_full_v1.pth')
         sentences = [input_datas[i] for i in range(len(input_datas)) if i not in missing_index]
-        # sentences = input_datas
-        # print(sentences[:10])
-        # exit()
+
     elif test_data == "aokvqa":
         if correct_answer:
             missing_index = [795, 875, 976, 1074]
@@ -70,39 +67,38 @@ if test_data=="hal" or test_data=="chair" or test_data=="coco_caption" or test_d
         input_datas = torch.load(f'vqa/{prefix}vqa_ce_val_full_v1.pth')
         sentences = torch.load(f"vqa/{prefix}vqa_ce_val_question_full_v1.pth")
     
-    
-    vectorizer = TfidfVectorizer(stop_words='english')  # 去除停用词
+    vectorizer = TfidfVectorizer(stop_words='english')
     X = vectorizer.fit_transform(sentences)
     
     for num_clusters in [3,5,10]: # ,20,30,40,50,100
-        # 2. 使用 K-Means 进行聚类
+        # 2. Perform clustering using K-Means
         kmeans = KMeans(n_clusters=num_clusters, random_state=42)
         kmeans.fit(X)
 
-        # 获取聚类标签
+        # Get cluster labels
         labels = kmeans.labels_
 
-        # 3. 可视化聚类结果（使用 PCA 降维）
-        pca = PCA(n_components=2)  # 降维到 2D
+        # 3. Visualize clustering results (using PCA for dimensionality reduction)
+        pca = PCA(n_components=2)  # Reduce to 2D
         X_pca = pca.fit_transform(X.toarray())
 
-        # 绘制聚类结果
+        # Plot clustering results
         plt.figure(figsize=(8, 6))
         for i in range(num_clusters):
             plt.scatter(X_pca[labels == i, 0], X_pca[labels == i, 1], label=f'Cluster {i+1}')
             
-        # 检查数据数量
+        # Check number of data points
         print(f"Number of sentences: {len(sentences)}")
 
-        # 检查聚类标签分布
+        # Check cluster label distribution
         import numpy as np
         unique, counts = np.unique(labels, return_counts=True)
         print("Cluster distribution:", dict(zip(unique, counts)))
 
-        # 4. 映射每个索引到对应的类别编号
-        index_to_cluster = {index: label for index, label in enumerate(labels)}  # 类别编号从 1 开始
+        # 4. Map each index to its corresponding cluster ID
+        index_to_cluster = {index: label for index, label in enumerate(labels)}  # Cluster IDs start from 1
 
-        # 输出每个索引及其对应的类别编号
+        # Output each index and its corresponding cluster ID
         for index, cluster in index_to_cluster.items():
             print(f"Index: {index} -> Cluster: {cluster}")
         
@@ -120,18 +116,15 @@ if test_data=="hal" or test_data=="chair" or test_data=="coco_caption" or test_d
             else:
                 torch.save(index_to_cluster, f'margin/{prefix}wrong_aokvqa_index_to_cluster-{num_clusters}.pth')
                 print(len(index_to_cluster), f'margin/{prefix}wrong_aokvqa_index_to_cluster-{num_clusters}.pth')                
-        
         elif test_data == "chair":
             torch.save(index_to_cluster, f'margin/chair_index_to_cluster-{num_clusters}.pth')
             print(len(index_to_cluster), f'margin/chair_index_to_cluster-{num_clusters}.pth')
         elif test_data == "coco_caption":
             torch.save(index_to_cluster, f'margin/{prefix}coco_caption_index_to_cluster-{num_clusters}.pth')
             print(len(index_to_cluster), f'margin/{prefix}coco_caption_index_to_cluster-{num_clusters}.pth')
-
         elif test_data=="vqa_origin":
             torch.save(index_to_cluster, f'margin/{prefix}vqa_origin_index_to_cluster-{num_clusters}.pth')
             print(len(index_to_cluster), f'margin/{prefix}vqa_origin_index_to_cluster-{num_clusters}.pth')
-
 
     print(sentences[:5])
         
@@ -141,38 +134,38 @@ elif test_data=="vqa":
     sentences = torch.load(f"vqa/{prefix}vqa_ce_val_question_full_v1.pth")
         
     # sentences=[item['question'] for i, item in enumerate(meta_data) if i not in missing_index]
-    vectorizer = TfidfVectorizer(stop_words='english')  # 去除停用词
+    vectorizer = TfidfVectorizer(stop_words='english')  # Remove stop words
     X = vectorizer.fit_transform(sentences)
     
     for num_clusters in [3,5,10]:
-        # 2. 使用 K-Means 进行聚类
+        # 2. Perform clustering using K-Means
         kmeans = KMeans(n_clusters=num_clusters, random_state=42)
         kmeans.fit(X)
 
-        # 获取聚类标签
+        # Get cluster labels
         labels = kmeans.labels_
 
-        # 3. 可视化聚类结果（使用 PCA 降维）
-        pca = PCA(n_components=2)  # 降维到 2D
+        # 3. Visualize clustering results (using PCA for dimensionality reduction)
+        pca = PCA(n_components=2)  # Reduce to 2D
         X_pca = pca.fit_transform(X.toarray())
 
-        # 绘制聚类结果
+        # Plot clustering results
         plt.figure(figsize=(8, 6))
         for i in range(num_clusters):
             plt.scatter(X_pca[labels == i, 0], X_pca[labels == i, 1], label=f'Cluster {i+1}')
             
-        # 检查数据数量
+        # Check number of data points
         print(f"Number of sentences: {len(sentences)}")
 
-        # 检查聚类标签分布
+        # Check cluster label distribution
         import numpy as np
         unique, counts = np.unique(labels, return_counts=True)
         print("Cluster distribution:", dict(zip(unique, counts)))
 
-        # 4. 映射每个索引到对应的类别编号
-        index_to_cluster = {index: label for index, label in enumerate(labels)}  # 类别编号从 1 开始
+        # 4. Map each index to its corresponding cluster ID
+        index_to_cluster = {index: label for index, label in enumerate(labels)}  # Cluster IDs start from 1
 
-        # 输出每个索引及其对应的类别编号
+        # Output each index and its corresponding cluster ID
         for index, cluster in index_to_cluster.items():
             print(f"Index: {index} -> Cluster: {cluster}")
 
@@ -180,52 +173,48 @@ elif test_data=="vqa":
         print(len(index_to_cluster), f'margin/{prefix}vqa_index_to_cluster-{num_clusters}.pth')
         
     print(sentences[:5])
-        
     
 elif test_data=="pope" or test_data=="insuff_att" or test_data=="amb_desc" or test_data=="mislead":
 
     train_dataset = load_dataset("lmms-lab/POPE", split="test") #"default"
 
-    # 示例数据：一系列简短语句
+    # Example data: a list of short sentences
     sentences=[item['question'] for item in train_dataset]
-    # 1. 使用 TF-IDF 提取特征
-    vectorizer = TfidfVectorizer(stop_words='english')  # 去除停用词
+    # 1. Extract features using TF-IDF
+    vectorizer = TfidfVectorizer(stop_words='english')  # Remove stop words
     X = vectorizer.fit_transform(sentences)
 
 
     for num_clusters in [3,5,10]: # ,20,30,40,50,100
-        # 2. 使用 K-Means 进行聚类
+        # 2. Perform clustering using K-Means
         # num_clusters = 5
         kmeans = KMeans(n_clusters=num_clusters, random_state=42)
         kmeans.fit(X)
 
-        # 获取聚类标签
+        # Get cluster labels
         labels = kmeans.labels_
 
-        # 3. 可视化聚类结果（使用 PCA 降维）
-        pca = PCA(n_components=2)  # 降维到 2D
+        # 3. Visualize clustering results (using PCA for dimensionality reduction)
+        pca = PCA(n_components=2)  # Reduce to 2D
         X_pca = pca.fit_transform(X.toarray())
 
-
-
-        # 绘制聚类结果
+        # Plot clustering results
         plt.figure(figsize=(8, 6))
         for i in range(num_clusters):
             plt.scatter(X_pca[labels == i, 0], X_pca[labels == i, 1], label=f'Cluster {i+1}')
             
-            
-        # 检查数据数量
+        # Check number of data points
         print(f"Number of sentences: {len(sentences)}")
 
-        # 检查聚类标签分布
+        # Check cluster label distribution
         import numpy as np
         unique, counts = np.unique(labels, return_counts=True)
         print("Cluster distribution:", dict(zip(unique, counts)))
 
-        # 4. 映射每个索引到对应的类别编号
-        index_to_cluster = {index: label for index, label in enumerate(labels)}  # 类别编号从 1 开始
+        # 4. Map each index to its corresponding cluster ID
+        index_to_cluster = {index: label for index, label in enumerate(labels)}  # Cluster IDs start from 1
 
-        # 输出每个索引及其对应的类别编号
+        # Output each index and its corresponding cluster ID
         for index, cluster in index_to_cluster.items():
             print(f"Index: {index} -> Cluster: {cluster}")
 
@@ -234,43 +223,40 @@ elif test_data=="pope" or test_data=="insuff_att" or test_data=="amb_desc" or te
 elif test_data=="indom" or test_data=="outdom":
     sentences=torch.load(f'pope/{prefix}pope_question_list{test_data}.pth')
     # sentences=[item['question'] for item in train_dataset]
-    vectorizer = TfidfVectorizer(stop_words='english')  # 去除停用词
+    vectorizer = TfidfVectorizer(stop_words='english')  # Remove stop words
     X = vectorizer.fit_transform(sentences)
 
 
     for num_clusters in [3,5,10]: # ,20,30,40,50,100
-        # 2. 使用 K-Means 进行聚类
+        # 2. Perform clustering using K-Means
         # num_clusters = 5
         kmeans = KMeans(n_clusters=num_clusters, random_state=42)
         kmeans.fit(X)
 
-        # 获取聚类标签
+        # Get cluster labels
         labels = kmeans.labels_
 
-        # 3. 可视化聚类结果（使用 PCA 降维）
-        pca = PCA(n_components=2)  # 降维到 2D
+        # 3. Visualize clustering results (using PCA for dimensionality reduction)
+        pca = PCA(n_components=2)  # Reduce to 2D
         X_pca = pca.fit_transform(X.toarray())
 
-
-
-        # 绘制聚类结果
+        # Plot clustering results
         plt.figure(figsize=(8, 6))
         for i in range(num_clusters):
             plt.scatter(X_pca[labels == i, 0], X_pca[labels == i, 1], label=f'Cluster {i+1}')
             
-            
-        # 检查数据数量
+        # Check number of data points
         print(f"Number of sentences: {len(sentences)}")
 
-        # 检查聚类标签分布
+        # Check cluster label distribution
         import numpy as np
         unique, counts = np.unique(labels, return_counts=True)
         print("Cluster distribution:", dict(zip(unique, counts)))
 
-        # 4. 映射每个索引到对应的类别编号
-        index_to_cluster = {index: label for index, label in enumerate(labels)}  # 类别编号从 1 开始
+        # 4. Map each index to its corresponding cluster ID
+        index_to_cluster = {index: label for index, label in enumerate(labels)}  # Cluster IDs start from 1
 
-        # 输出每个索引及其对应的类别编号
+        # Output each index and its corresponding cluster ID
         for index, cluster in index_to_cluster.items():
             print(f"Index: {index} -> Cluster: {cluster}")
         

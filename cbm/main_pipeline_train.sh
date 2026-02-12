@@ -16,7 +16,6 @@ python ms_coco_training_data_trainsform.py
 # 用 500 sample 计算F1
 
 # 3. cd to the LLaVa and extract llava features based on "ce_data.pth"
-
 # torch.save(info_save_list, ce_data_dir+'ce_training.pth')
 # torch.save(label_list, ce_data_dir+'ce_training_label.pth')
 # torch.save(output_list, ce_data_dir+'ce_training_response.pth')  # 新增保存模型输出的代码
@@ -31,6 +30,6 @@ cd ../cbm
 
 ##############################
 
-vqa_ms_coco_training_data_trainsform-v1.py # training_set=True
+# vqa_ms_coco_training_data_trainsform-v1.py # training_set=True
 
 
