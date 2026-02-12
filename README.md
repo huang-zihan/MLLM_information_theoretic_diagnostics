@@ -2,105 +2,80 @@
 
 [Paper Link](https://openreview.net/pdf?id=pQm66IPmeE)
 
-<!-- ## Overview
-
-Existing multimodal large language models (MLLMs) often lack traceable and explainable mechanisms for visual-textual alignment, making
-it challenging to understand how textual instructions shape multimodal
-representations. To address this shortcoming, we propose an informationtheoretic framework that clarifies how MLLMs handle and transform both
-text and visual inputs. In particular, we measure the visual information gain
-that arises from textual instructions and multimodal encodings, thereby
-illuminating how different modalities interact and contribute to the model’s
-overall processing. Our framework decomposes the multimodal encoding
-process into layer-wise mutual information measures for better explainability, quantifying the visual contribution as the difference between unconditional and text-conditional mutual information. Specifically, inspired
-by the Information Bottleneck framework, we introduce a Concept Bottleneck that maps high-dimensional multimodal representations into an
-interpretable space, enabling tractable variational upper bounds on the
-mutual information between visual inputs and the model’s internal states.
-Furthermore, we quantify the contextual contribution introduced by textual
-cues via an InfoNCE mechanism that contrasts multimodal representations
-computed with and without text guidance. This dual perspective, facilitated by tractable variational upper bounds, provides insight into how
-visual information is encoded and filtered by textual instructions, while also
-highlighting the contextual information induced and enhanced by MLLMs.
-Empirical findings demonstrate underexplored dynamics of visual-textual
-interaction within MLLMs, underscoring how textual instructions distinctly
-shape visual representations and demonstrating how visual prompts, when
-effectively paired with instructions, enhance multimodal understanding. -->
-
-<!-- ## Mathematical Framework
-
-Given an image $I \in \mathbb{R}^{H \times W \times 3}$ and a textual question $Q$, our CBM framework operates through three stages:
-
-### 1. Concept Extraction
-Object-level concepts are extracted using a pretrained detector:
-$$
-C_{\text{obj}} = f_{\text{detector}}(I) = \{(c_i, b_i, s_i)\}_{i=1}^{N}
-$$
-where $c_i$ denotes concept class, $b_i$ the bounding box, and $s_i$ the confidence score.
-
-### 2. Multimodal Feature Encoding
-LLaVA processes both visual and textual inputs:
-$$
-F_{\text{LLaVA}} = \phi_{\text{LLaVA}}(I, Q) \in \mathbb{R}^{d}
-$$
-
-### 3. Concept Bottleneck Prediction
-The bottleneck layer learns to predict concepts from features:
-$$
-P(C|I,Q) = \sigma(W \cdot F_{\text{LLaVA}} + b)
-$$
-where $\sigma$ is the sigmoid function, $W \in \mathbb{R}^{d \times K}$, $b \in \mathbb{R}^{K}$, and $K$ is the number of concepts. -->
-
-<!-- ## Installation
-
-### Prerequisites
-- Python 3.8+
-- PyTorch 1.12+
-- CUDA 11.3+
-
-### Setup
-```bash
-# Clone the repository
-git clone [repository-url]
-cd cbm
-
-# Install dependencies
-pip install torch torchvision
-pip install -r requirements.txt
-
-# Setup LLaVA submodule
-cd ../LLaVA
-pip install -e .
- -->
-
 ## File Structure
 ```
-cbm/
-├── main_pipeline_train.sh            # Training pipeline script
-├── main_pipeline_test.sh             # Testing pipeline script
-├── feature_extract.py                # COCO feature extraction
-├── ms_coco_training_data_trainsform.py # Training data transformation
-├── pope_test_data_trainsform.py      # Pope dataset preparation
-├── ce_train.sh                       # CBM training script
-├── ce_test.py                        # CBM evaluation
-├── vqa_feature_extract.py            # VQA feature extraction
-├── chair_test_data_trainsform.py     # CHAIR dataset preparation
-├── hal_feature_extract.py            # HAL feature extraction
-└── result/
-    └── plot_offline.py               # Result visualization
-
-LLaVA/
-├── ce_datagen.sh                     # LLaVA/Qwen feature generation for training
-├── run-pope-cbm.sh                   # Pope evaluation with LLaVA
-├── run-chair-cbm.sh                  # CHAIR evaluation with LLaVA
-└── vqa_datagen-v1.py                 # VQA feature generation
+MLLM_information_theoretic_diagnostics/
+│
+├── cbm/                           # Concept Bottleneck Model pipeline
+│   ├── main_pipeline_train.sh     # Full training pipeline
+│   ├── main_pipeline_test.sh      # Full testing & evaluation pipeline
+│   ├── feature_extract.py        # COCO2014 object annotation extraction (YOLO)
+│   ├── ms_coco_training_data_trainsform.py  # Training data construction
+│   ├── ce_train.py               # CBM training
+│   ├── ce_test.py               # Core CBM evaluation (Pope, etc.)
+│   │
+│   ├── pope_test_data_trainsform.py      # Pope dataset annotation
+│   ├── chair_test_data_trainsform.py     # CHAIR dataset annotation
+│   ├── hal_feature_extract.py           # HAL feature extraction
+│   ├── hal_ms_coco_training_data_trainsform.py
+│   ├── vqa_feature_extract.py           # VQA v2 feature extraction
+│   ├── vqa_ms_coco_training_data_trainsform.py
+│   ├── coco_caption_feature_extract.py  # COCO Caption feature extraction
+│   ├── coco_caption_training_data_trainsform.py
+│   ├── aokvqa_test_data_trainsform.py   # AOK-VQA test data transformation
+│   │
+│   ├── chair_ce_test.py          # CHAIR evaluation
+│   ├── hal_ce_test.py            # HAL evaluation
+│   ├── vqa_ce_test.py            # VQA v2 evaluation
+│   ├── aokvqa_ce_test.py         # AOK-VQA evaluation
+│   ├── coco_caption_ce_test.py   # COCO Caption evaluation
+│   ├── domain_ce_test.py         # Domain shift evaluation
+│   │
+│   ├── kmeans.py                 # K-means clustering analysis
+│   ├── vqa_question_type.py      # Question type analysis (VQA)
+│   │
+│   ├── similarity/               # Concept injection & information metrics
+│   │   ├── domain_inject_metric.py
+│   │   ├── hal_visual_inject_metric.py
+│   │   ├── inject_metric.py
+│   │   ├── visual_inject_metric.py
+│   │   ├── text_inject_metric.py
+│   │   ├── similarity.py
+│   │   └── metric2_plot_offline.py  # Result visualization
+│   │
+│   └── result/                   # Output plots (generated)
+│       └── plot_offline.py
+│
+└── LLaVA/                        # LLaVA/Qwen feature extraction & inference
+    ├── env.yml                  # Conda environment
+    ├── ce_datagen.sh            # Training feature generation (CBM training)
+    ├── ce_datagen.py
+    ├── run-pope-cbm.sh          # Pope evaluation with LLaVA/Qwen
+    ├── run-pope-cbm.py
+    ├── run-chair-cbm.sh         # CHAIR evaluation
+    ├── run-chair-cbm.py
+    ├── run-aokvqa-cbm.sh        # AOK-VQA evaluation
+    ├── run-aokvqa-cbm.py
+    ├── hal_datagen.sh           # HAL dataset feature generation
+    ├── hal_datagen.py
+    ├── vqa_datagen.sh           # VQA v2 feature generation
+    ├── vqa_datagen.py
+    ├── vqa_datagen-intervene.py # Intervention-based feature generation
+    ├── coco_caption_datagen.sh  # COCO Caption feature generation
+    ├── coco_caption_datagen.py
+    ├── classify.sh              # Final Fv calculation (classification probe)
+    └── classify.py
 ```
 
 
 ## Training Pipeline (`cbm/main_pipeline_train.sh`)
 
-### Step 1: Feature Extraction
-Extract object annotations from COCO2014 dataset:
+### Step 1: COCO Object Annotation Extraction
+Extract YOLO object detections from COCO2014 training set.
+
 
 ```bash
+cd cbm
 python feature_extract.py
 ```
 
@@ -109,9 +84,9 @@ python feature_extract.py
 
 - `raw_result_full.pth`: Raw detection results from object detector
 
-### Step 2 Training Data Construction:
+### Step 2 Construct Concept‑Embodied Training Data
 
-Transform COCO annotations into concept-embodied training data:
+Transform COCO annotations into a dataset with image features and softmax‑normalized concept ground truths.
 
 ```bash
 python ms_coco_training_data_trainsform.py
@@ -120,11 +95,11 @@ python ms_coco_training_data_trainsform.py
 #### Output Files:
 - `ce_data.pth`: Dataset containing image features and softmaxed concept ground truth
 
-### Step 3 LLaVA/Qwen Feature Extraction:
-Extract multimodal features using LLaVA/Qwen:
+### Step 3 Extract LLaVA/Qwen Features
+Run LLaVA or Qwen on the constructed dataset to obtain multimodal representations.
 ```bash
 cd ../LLaVA
-./ce_datagen.sh # which include the branch for Qwen
+./ce_datagen.sh          # contains branch for Qwen
 ```
 
 #### Output Files:
@@ -134,113 +109,116 @@ cd ../LLaVA
 
 - `ce_training_response.pth`: LLaVA/Qwen model outputs
 
-### Step 4 LLaVA/Qwen Feature Extraction:
+### Train Concept Bottleneck Model
 
 Train the Concept Bottleneck Model:
 ```bash
 cd ../cbm
-./ce_train.sh # which include the branch for Qwen
+./ce_train.sh
 ```
 
 #### Output File:
 - `ce_model_{index}.pth`: Trained CBM model weights
 
 
-## Testing Pipeline (cbm/main_pipeline_test.sh)
+## Extract Hidden on Other Datasets and Evaluate  (cbm/main_pipeline_test.sh)
 
-### 1. Pope Dataset Evaluation
-
-### Step 1: Pope Data Annotation
-```bash
-python pope_test_data_trainsform.py
-```
-
-#### Output File: 
-- `pope_ce_test_data.pth`
-
-### Step 2: LLaVA/Qwen Feature Extraction for Pope
+### Pope Dataset Evaluation
 
 ```bash
+# Data annotation (using object_dict from training)
+python pope_test_data_trainsform.py          # → pope_ce_test_data.pth
+
+# LLaVA/Qwen feature extraction
 cd ../LLaVA
-./run-pope-cbm.sh # which include the branch for Qwen
-```
+./run-pope-cbm.sh                            # → pope_*_list.pth files
 
-#### Output Files:
-- pope_info_probe_list.pth
-
-- pope_label_list.pth
-
-- pope_output_list.pth
-
-- pope_question_list.pth
-
-- pope_vit_feature_list.pth
-
-
-#### Step 3: CBM Evaluation on Pope
-
-```bash
+# CBM evaluation
 cd ../cbm
 python ce_test.py
 ```
 
-## 2. VQA v2 on COCO Validation
+### AOK-VQA Dataset
 
 ```bash
-# Feature extraction
-python vqa_feature_extract.py
-
-# Data transformation (training_set=False)
-python vqa_ms_coco_training_data_trainsform-v1.py
-
-# LLaVA feature generation
+python aokvqa_test_data_trainsform.py
 cd ../LLaVA
-./vqa_datagen-v1.py
+./run-aokvqa-cbm.sh
+cd ../cbm
+python aokvqa_ce_test.py
 ```
 
-## 3. CHAIR Open Dataset
+### CHAIR Dataset
 
 ```bash
-# Data transformation
 python chair_test_data_trainsform.py
-
-# LLaVA feature extraction
 cd ../LLaVA
 ./run-chair-cbm.sh
-
-# CBM evaluation
 cd ../cbm
-python chair_ce_test-v1.py
+python chair_ce_test.py
+python kmeans.py          # clustering analysis
+```
 
-# K-means clustering analysis
+### HAL Dataset
+```bash
+python hal_feature_extract.py
+python hal_ms_coco_training_data_trainsform.py   # training_set=False
+cd ../LLaVA
+./hal_datagen.sh
+cd ../cbm
+python hal_ce_test.py
 python kmeans.py
 ```
 
-## 4. HAL Dataset
+### VQA v2 (COCO validation)
 ```bash
-# Feature extraction
-python hal_feature_extract.py
-
-# Data transformation (training_set=False)
-python hal_ms_coco_training_data_trainsform-v1.py
-
-# LLaVA feature generation
+python vqa_feature_extract.py
+python vqa_ms_coco_training_data_trainsform.py   # training_set=False
 cd ../LLaVA
-./hal_datagen-v1.py
-
-# CBM evaluation
+./vqa_datagen.sh
 cd ../cbm
-python hal_ce_test-v1.py
+python vqa_ce_test.py
+python kmeans.py
+python vqa_question_type.py
 ```
 
-## 5. Domain Analysis
-
+### COCO Caption
 ```bash
-# Question type analysis
-python vqa_question_type.py
+python coco_caption_feature_extract.py
+python coco_caption_training_data_trainsform.py
+cd ../LLaVA
+./coco_caption_datagen.sh
+cd ../cbm
+python coco_caption_ce_test.py
+python kmeans.py
+```
 
-# Domain injection metrics
+## Domain Analysis
+### Question type analysis
+```bash
+python vqa_question_type.py
+```
+
+### Domain shift evaluation
+```bash
+python domain_ce_test.py
+```
+
+## Concept Injection Metrics
+
+### Fₜ, injection scores
+```bash
+cd similarity
 python domain_inject_metric.py
+python inject_metric.py
+python visual_inject_metric.py
+python text_inject_metric.py
+python hal_visual_inject_metric.py
+```
+
+## Concept Injection Metrics
+```bash
+python result/metric2_plot_offline.py   # offline plots from saved results
 ```
 
 ## YOLO Object Dictionary
@@ -268,24 +246,15 @@ The pipeline uses the following 80-class YOLO object dictionary:
  78: 'hair drier', 79: 'toothbrush'}
 ```
 
-
-
-@inproceedings{huang25image,
-  title = "Image difference captioning via adversarial preference optimization",
-  author = "Zihan Huang and Junda Wu and Rohan Surana and Tong Yu and David Arbour and Ritwik Sinha and Julian McAuley",
-  year = "2025",
-  booktitle = "EMNLP"
-}
-
 ## Citation
 
 If you use this code in your research, please cite:
 
 ```bibtex
-@inproceedings{huang25image,
-  title = "Image difference captioning via adversarial preference optimization",
-  author = "Zihan Huang and Junda Wu and Rohan Surana and Tong Yu and David Arbour and Ritwik Sinha and Julian McAuley",
-  year = "2025",
-  booktitle = "EMNLP"
+@inproceedings{huang2025traceable,
+  title={Traceable and Explainable Multimodal Large Language Models: An Information-Theoretic View},
+  author={Huang, Zihan and Wu, Junda and Surana, Rohan and Jain, Raghav and Yu, Tong and Addanki, Raghavendra and Arbour, David and Kim, Sungchul and McAuley, Julian},
+  booktitle={Second Conference on Language Modeling},
+  year={2025}
 }
 ```
